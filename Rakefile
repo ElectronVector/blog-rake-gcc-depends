@@ -1,4 +1,5 @@
 require 'rake/clean'
+require 'rake/loaders/makefile'
 
 CLEAN.include('*.o', '*.mf')
 CLOBBER.include('*.exe')
@@ -16,4 +17,24 @@ end
 
 rule '.o' => '.c' do |task|
     sh "gcc -c #{task.source}"
+end
+
+# The rule for creating dependency files.
+rule '.mf' => '.c' do |task|
+    sh "gcc -MM #{task.source} -MF #{task.name}"
+end
+
+# Explictly import each dependency file. If the file doesn't
+# exist, the file task to create it is invoked.
+depend_files.each do |dep|
+    puts "importing #{dep}"
+    import dep
+end
+
+# Declare an explict file task for each dependency file. This will
+# use the rule defined to create .mf files defined earlier. This
+# is necessary because it assures that the .mf file exists before
+# importing.
+depend_files.each do |dep|
+  file dep
 end
