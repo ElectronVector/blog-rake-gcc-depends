@@ -21,7 +21,13 @@ end
 
 # The rule for creating dependency files.
 rule '.mf' => '.c' do |task|
-    sh "gcc -MM #{task.source} -MF #{task.name}"
+    cmd = "gcc -MM #{task.source}"
+    puts "#{cmd}"
+    make_target = `#{cmd}`
+    open("#{task.name}", 'w') do |f|
+        f.puts "#{make_target}"
+        f.puts "#{make_target.sub(".o:", ".mf:")}"
+    end
 end
 
 # Explictly import each dependency file. If the file doesn't
